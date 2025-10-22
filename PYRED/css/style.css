@@ -1,4 +1,44 @@
+/* 🔹 Hace que las imágenes se ajusten */
+img {
+  max-width: 100%;
+  height: auto;
+}
 
+/* 🔹 Tablas adaptables: se pueden desplazar si son grandes */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  display: block;
+  overflow-x: auto;
+}
+
+/* 🔹 Evita que el texto se salga del borde */
+body, td, th, p, h1, h2, h3 {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 🔹 Acomoda mejor en pantallas pequeñas */
+@media (max-width: 768px) {
+  .menu a {
+    display: block;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  table, tr, td {
+    display: block;
+    width: 100%;
+  }
+
+  .Divs {
+    text-align: center;
+  }
+
+  .FR {
+    padding: 1rem;
+  }
+}
 :root {
     --CLN: #000000; /*Color negro */
     --CLL: #ffffff;/*Color Letras*/
