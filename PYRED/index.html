@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>PYRED</title><!-- Titulo de la Pagina -->
+    <link rel="icon" href="IMAGENES/logo PYRED.png" type="image/png"><!-- Icono en la pestaña -->
+    <link rel="stylesheet" href="css/style.css"><!-- CSS externo -->
+</head>
+<body>
+  
+ <!-- Botón / pestaña -->
+  <button id="openTab" class="auth-tab-btn" aria-controls="authPanel" aria-expanded="false" title="Cuenta">
+    <!-- simple icon: user lock -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"></path>
+      <path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"></path>
+    </svg>
+    <span class="label">Cuenta</span>
+  </button>
+
+  <!-- Panel deslizante -->
+  <aside id="authPanel" class="auth-panel" role="dialog" aria-modal="true" aria-hidden="true">
+<header class="panel-header">
+      <div>
+        <div id="panelTitle" class="title">Iniciar sesión</div>
+        <div id="panelSubtitle" class="subtitle">Bienvenido de vuelta</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="mode-switch" aria-hidden="false">
+          <button id="btnLogin" class="active" type="button">Iniciar</button>
+          <button id="btnSignup" type="button">Crear</button>
+        </div>
+        <button id="closePanel" aria-label="Cerrar panel" style="background:transparent;border:none;font-size:18px;cursor:pointer">✕</button>
+      </div>
+    </header>
+    <div class="panel-body">
+      <form id="authForm" novalidate>
+        <div id="nameField" class="field" style="display:none">
+          <label for="name">Nombre</label>
+          <input id="name" name="name" type="text" placeholder="Tu nombre completo" autocomplete="name" />
+        </div>
+
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <input id="email" name="email" type="email" placeholder="hola@ejemplo.com" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <input id="password" name="password" type="password" placeholder="Al menos 6 caracteres" autocomplete="current-password" minlength="6" required />
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0">
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px">
+            <input id="remember" type="checkbox" /> <span class="muted">Recuérdame</span>
+          </label>
+          <button id="forgotBtn" type="button" class="muted" style="background:none;border:none;cursor:pointer">¿Olvidaste la contraseña?</button>
+        </div>
+
+        <div class="field">
+          <button id="submitBtn" class="btn btn-primary" type="submit">Iniciar sesión</button>
+        </div>
+      </form>
+
+      <div style="margin-top:14px;border-top:1px solid #f1f5f9;padding-top:12px">
+        <div class="small">------------</div>
+      </div>
+
+      <div style="margin-top:12px" class="small muted">
+        Al usar el servicio aceptas nuestros <a href="#" style="text-decoration:underline">Términos</a> y la <a href="#" style="text-decoration:underline">Política de privacidad</a>.
+      </div>
+    </div>
+
+    <div class="panel-footer">
+      <div id="statusText" class="small muted">No has iniciado sesión</div>
+    </div>
+  </aside>
+
+  <script>
+    (function(){
+      const openBtn = document.getElementById('openTab');
+      const panel = document.getElementById('authPanel');
+      const closeBtn = document.getElementById('closePanel');
+      const btnLogin = document.getElementById('btnLogin');
+      const btnSignup = document.getElementById('btnSignup');
+      const nameField = document.getElementById('nameField');
+      const panelTitle = document.getElementById('panelTitle');
+      const panelSubtitle = document.getElementById('panelSubtitle');
+      const submitBtn = document.getElementById('submitBtn');
+      const authForm = document.getElementById('authForm');
+      const statusText = document.getElementById('statusText');
+      const openStateAttr = 'aria-expanded';
+
+      let mode = 'login'; // 'login' | 'signup'
+      let isOpen = false;
+
+      function setOpen(v){
+        isOpen = !!v;
+        if(isOpen){
+          panel.classList.add('open');
+          panel.setAttribute('aria-hidden','false');
+          openBtn.setAttribute(openStateAttr,'true');
+          // focus first input
+          setTimeout(()=> document.getElementById('email').focus(), 220);
+        }else{
+          panel.classList.remove('open');
+          panel.setAttribute('aria-hidden','true');
+          openBtn.setAttribute(openStateAttr,'false');
+        }
+      }
+
+      function setMode(m){
+        mode = m;
+        if(mode === 'login'){
+          btnLogin.classList.add('active');
+          btnSignup.classList.remove('active');
+          nameField.style.display = 'none';
+          panelTitle.textContent = 'Iniciar sesión';
+          panelSubtitle.textContent = 'Bienvenido de vuelta';
+          submitBtn.textContent = 'Iniciar sesión';
+          document.getElementById('password').setAttribute('autocomplete','current-password');
+        }else{
+          btnSignup.classList.add('active');
+          btnLogin.classList.remove('active');
+          nameField.style.display = 'block';
+          panelTitle.textContent = 'Crear cuenta';
+          panelSubtitle.textContent = 'Empieza con tu correo';
+          submitBtn.textContent = 'Crear cuenta';
+          document.getElementById('password').setAttribute('autocomplete','new-password');
+        }
+      }
+
+      openBtn.addEventListener('click', ()=> setOpen(!isOpen));
+      closeBtn.addEventListener('click', ()=> setOpen(false));
+
+      // keyboard: close on Escape
+      document.addEventListener('keydown', (e)=> {
+        if(e.key === 'Escape' && isOpen) setOpen(false);
+      });
+
+      btnLogin.addEventListener('click', ()=> setMode('login'));
+      btnSignup.addEventListener('click', ()=> setMode('signup'));
+
+      // simple form submit handling
+      authForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        // basic validation
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const name = document.getElementById('name').value.trim();
+
+        if(!email || !password){
+          alert('Por favor completa los campos requeridos.');
+          return;
+        }
+        if(password.length < 6){
+          alert('La contraseña debe tener al menos 6 caracteres.');
+          return;
+        }
+        if(mode === 'signup' && name.length < 2){
+          alert('Por favor escribe tu nombre.');
+          return;
+        }
+
+        // simulate async API call
+        submitBtn.disabled = true;
+        submitBtn.textContent = mode === 'login' ? 'Iniciando...' : 'Creando...';
+        statusText.textContent = mode === 'login' ? 'Intentando iniciar sesión...' : 'Creando cuenta...';
+
+        setTimeout(()=>{
+          submitBtn.disabled = false;
+          submitBtn.textContent = mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta';
+          const friendly = mode === 'login' ? 'Iniciaste sesión como' : 'Cuenta creada para';
+          statusText.textContent = friendly + ' ' + email;
+          alert((mode==='login' ? 'Iniciado sesión: ' : 'Cuenta creada: ') + email);
+          // close panel after success
+          setOpen(false);
+          // reset form (you may want to keep email)
+          // authForm.reset();
+        }, 900);
+      });
+
+      // Placeholder handlers for social buttons
+      document.getElementById('googleBtn').addEventListener('click', ()=> {
+        alert('Aquí redirigirías a Google OAuth (placeholder).');
+      });
+      document.getElementById('githubBtn').addEventListener('click', ()=> {
+        alert('Aquí redirigirías a GitHub OAuth (placeholder).');
+      });
+
+      document.getElementById('forgotBtn').addEventListener('click', ()=> {
+        alert('Funcionalidad de recuperación de contraseña (placeholder).');
+      });
+
+      // click outside to close (but ignore clicks inside panel)
+      document.addEventListener('click', (e)=>{
+        if(!isOpen) return;
+        const withinPanel = panel.contains(e.target) || openBtn.contains(e.target);
+        if(!withinPanel) setOpen(false);
+      });
+
+      // initial state
+      setMode('login');
+      setOpen(false);
+    })();
+  </script>
+    <div class="bar"><!-- Barra Superior -->
+        <div class="logo">
+            <a href="PagPrincipal (2).html"><img src="IMAGENES/ESTRELLA.png"></a><!-- Logo que lleva a la pagina principal -->
+        </div>
+        <div class="menu"><!-- Diferentes paginas relacionadas -->
+            <a href="Contactanos.html">Contáctanos</a>
+            <a href="Servicios.html">Servicios</a>
+        </div>
+    </div>
+    <p class="Lema">"Creando y construyendo soluciones"</p><!-- Lema de la empresa -->
+    <div class="FR"><!--Primera parte / Quienes somos-->
+        <h1 class="BN">¿Quiénes Somos?</h1>
+        <table>
+            <tr>
+                <td>
+                    <img src="IMAGENES/ESTRELLA.png" class="ImagenLogo">
+                </td>
+                <td class="Divs">
+                    <h2>Programadores y creadores de soluciones en redes u otros servicios.</h2><br>
+                    <p>Somos PYRED, una empresa creada por jóvenes a los que nos encanta programar y ser creativos. Nos inspiramos en el lobo porque es curioso, inteligente y único, como nosotros. Amamos la tecnología y queremos que más personas la usen para crear cosas geniales!</p>
+                </td>
+            </tr>
+        </table>
+    </div><br>
+
+    <div class="FR"><!--Seguna parte / Vision y mision -->
+        <h1 class="BN"><b>Misión y Visión</b></h1>
+        <div>
+            <table class="BT">
+                <tr>
+                    <th class="BT"><h2>Misión</h2></th>
+                    <th class="BT"><h2>Visión</h2></th>
+                </tr>
+                <tr>
+                    <td class="BT">
+                        <ul>
+                            <li class="Divs">
+                                Nuestra misión como empresa es contribuir a un avance tecnológico eficaz con el propósito de mejorar diferentes trabajos de la vida cotidiana, gracias a la calidad de la producción de nuestro trabajo como grupo
+                            </li>
+                        </ul>
+                    </td>
+                    <td class="BT">
+                        <ul>
+                            <li class="Divs">
+                                Queremos ser una empresa reconocida en todo el mundo por crear programas y herramientas de software útiles, creativas y fáciles de usar. 
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div><br>
+    
+    <div class="FR"> <!--Tecera parte / Objetivos-->
+        <h1>Objetivos</h1>
+        <table class="BT">
+            <tr>
+                <th class="BT"><h2>General</h2></th>
+            </tr>
+            <tr>
+                <td class="BT">
+                    <ul>
+                        <li>
+                            <p class="txc">El objetivo principal de PYRED es convertirse en una empresa de software reconocida por crear programas y aplicaciones que sean fáciles de usar, visualmente atractivos y realmente útiles para las personas. Buscamos apoyar a estudiantes, docentes, emprendedores y pequeños negocios con soluciones tecnológicas que combinen creatividad, innovación y funcionalidad, transmitiendo siempre cercanía y confianza en lo que hacemos.</p>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table><br>
+        <table class="BT">
+            <tr>
+                <th class="BT" colspan="4"><h2>Específicos</h2></th>
+            </tr>
+            <tr>
+                <td class="BT" id="MT">
+                    <ul>
+                        <li>
+                            <p class="txc">Crear paginas web o aplicaciones moviles para empresas pequeñas y medianas para la optimizacion de actividades recurrentres en la empresa.</p>
+                        </li>
+                    </ul>
+                </td>
+                <td class="BT" id="MT">
+                    <ul>
+                        <li>
+                            <p class="txc">Diseñar programas fáciles de usar que resuelvan necesidades reales, permitiendo que cualquier persona los use sin complicaciones.</p>
+                        </li>
+                    </ul>
+                </td>
+                <td class="BT" id="MT">
+                    <ul>
+                        <li>
+                            <p class="txc">Implementar un sistema inventario que permita a los usuarios realizar actualizaciones automáticas de stock.</p>
+                        </li>
+                    </ul>
+                </td>
+                <td class="BT" id="MT">
+                    <ul>
+                        <li>
+                            <p class="txc">Mantener una comunicación cercana con los clientes para mejorar continuamente.</p>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+   
+</body>
+</html>
